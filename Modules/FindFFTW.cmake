@@ -6,18 +6,11 @@
 #  FFTW_RUNTIMES        - List of .dll files on Windows
 #  FFTW_FOUND           - True if FFTW found.
 
-if(FFTW_INCLUDE_DIRS)
-  # Already in cache, be silent
-  set(FFTW_FIND_QUIETLY TRUE)
-endif(FFTW_INCLUDE_DIRS)
+find_path(FFTW_INCLUDE_DIRS NAMES fftw3.h ${FFTW_ROOT})
+find_library(FFTW_LIBRARIES NAMES fftw3 fftw3-3 libfftw3-3 ${FFTW_ROOT})
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-  find_path(FFTW_INCLUDE_DIRS NAMES fftw3.h HINTS ${FFTW_DIR} NO_DEFAULT_PATH)
-  find_library(FFTW_LIBRARIES NAMES fftw3 fftw3-3 libfftw3-3 HINTS ${FFTW_DIR} NO_DEFAULT_PATH)
-  find_file(FFTW_RUNTIMES NAMES libfftw3.dll libfftw3-3.dll HINTS ${FFTW_DIR} NO_DEFAULT_PATH)
-else()
-  find_path(FFTW_INCLUDE_DIRS NAMES fftw3.h)
-  find_library(FFTW_LIBRARIES NAMES fftw3 fftw3-3 libfftw3-3)
+  find_file(FFTW_RUNTIMES NAMES libfftw3.dll libfftw3-3.dll ${FFTW_ROOT})
 endif()
 
 # handle the QUIETLY and REQUIRED arguments and set FFTW_FOUND to TRUE if
