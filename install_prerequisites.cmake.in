@@ -13,35 +13,33 @@ foreach(prerequisite ${target_prerequisites})
   get_filename_component(prerequisite_realpath ${prerequisite_resolved} REALPATH)
   get_filename_component(prerequisite_realname ${prerequisite_realpath} NAME)
 
-  if(NOT (${prerequisite_name} MATCHES "^(libc.so|libm.so|libpthread.so)"))
-    if(WIN32)
-      set(install_location "${CMAKE_INSTALL_PREFIX}/bin/${prerequisite_name}")
-    else()
-      set(install_location "${CMAKE_INSTALL_PREFIX}/lib/@PROJECT_NAME@/${prerequisite_name}")
-    endif()
-
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} -E compare_files
-        ${prerequisite_realpath}
-        ${install_location}
-      RESULT_VARIABLE is_different
-      OUTPUT_QUIET
-      ERROR_QUIET)
-    if(is_different)
-      if(NOT ${run_by_cpack})
-        message(STATUS "Installing: ${install_location}")
-      endif()
-      execute_process(
-        COMMAND ${CMAKE_COMMAND} -E copy
-          ${prerequisite_realpath}
-          ${install_location})
-    else()
-      if(NOT ${run_by_cpack})
-        message(STATUS "Up-to-date: ${install_location}")
-      endif()
-    endif()
-    list(APPEND CMAKE_INSTALL_MANIFEST_FILES ${install_location})
+  if(WIN32)
+    set(install_location "${CMAKE_INSTALL_PREFIX}/bin/${prerequisite_name}")
+  else()
+    set(install_location "${CMAKE_INSTALL_PREFIX}/lib/@PROJECT_NAME@/${prerequisite_name}")
   endif()
+
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E compare_files
+      ${prerequisite_realpath}
+      ${install_location}
+    RESULT_VARIABLE is_different
+    OUTPUT_QUIET
+    ERROR_QUIET)
+  if(is_different)
+    if(NOT ${run_by_cpack})
+      message(STATUS "Installing: ${install_location}")
+    endif()
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${prerequisite_realpath}
+        ${install_location})
+  else()
+    if(NOT ${run_by_cpack})
+      message(STATUS "Up-to-date: ${install_location}")
+    endif()
+  endif()
+  list(APPEND CMAKE_INSTALL_MANIFEST_FILES ${install_location})
 endforeach()
 
 # On Linux, copy ld-linux
