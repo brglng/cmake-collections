@@ -1,25 +1,27 @@
+find_package(PkgConfig QUIET)
+
 foreach(comp ${FFmpeg_FIND_COMPONENTS})
-  if (NOT ("${comp}" MATCHES "^(avformat|avutil|avcodec|swscale|avdevice|avfilter|swresample)$"))
+  if (NOT ("${comp}" MATCHES "^(avcodec|avformat|avutil|avfilter|avdevice|swresample|swscale)$"))
     message(FATAL_ERROR "${comp} is not a FFmpeg component name")
   endif()
 
-  find_path(FFmpeg_${comp}_INCLUDE_DIRS lib${comp}/${comp}.h ${FFmpeg_ROOT})
+  pkg_check_modules(PkgConfig_${comp} lib${comp} QUIET)
 
-  if(NOT (${FFmpeg_${comp}_INCLUDE_DIRS} STREQUAL ""))
-    list(APPEND FFmpeg_INCLUDE_DIRS ${FFmpeg_${comp}_INCLUDE_DIRS})
-  endif()
+  set(FFmpeg_${comp}_FOUND ${PkgConfig_${comp}_FOUND})
+  set(FFmpeg_${comp}_INCLUDE_DIRS ${PkgConfig_${comp}_INCLUDE_DIRS})
+  list(APPEND FFmpeg_INCLUDE_DIRS ${PkgConfig_${comp}_INCLUDE_DIRS})
+endforeach()
 
-  find_library(FFmpeg_${comp}_LIBRARIES ${comp} ${FFmpeg_ROOT})
-
-  if(NOT ((${FFmpeg_${comp}_INCLUDE_DIRS} STREQUAL "") OR (${FFmpeg_${comp}_LIBRARIES} STREQUAL "")))
-    set(FFmpeg_${comp}_FOUND True)
-    list(APPEND FFmpeg_LIBRARIES ${FFmpeg_${comp}_LIBRARIES})
-  endif()
+foreach(comp ${FFmpeg_FIND_COMPONENTS})
+  foreach(lib ${PkgConfig_${comp}_LIBRARIES})
+    find_library(FFmpeg_${comp}_${lib}_LIBRARIES ${lib})
+    list(APPEND FFmpeg_${comp}_LIBRARIES ${FFmpeg_${comp}_${lib}_LIBRARIES})
+  endforeach()
+  list(APPEND FFmpeg_LIBRARIES ${FFmpeg_${comp}_LIBRARIES})
 endforeach()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(FFmpeg REQUIRED_VARS FFmpeg_LIBRARIES FFmpeg_INCLUDE_DIRS
-                                         HANDLE_COMPONENTS)
+find_package_handle_standard_args(FFmpeg REQUIRED_VARS FFmpeg_LIBRARIES FFmpeg_INCLUDE_DIRS HANDLE_COMPONENTS)
 
 mark_as_advanced(
   FFmpeg_INCLUDE_DIRS
